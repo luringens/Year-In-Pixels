@@ -15,25 +15,42 @@ fn main() -> Result<(), Box<std::error::Error>> {
         moodmap.insert(date, mood);
     }
 
-    let h = 27;
-    let w = 23;
+    let cell_size = 5_usize.pow(2);
+
+    let h = 27 * cell_size;
+    let w = 23 * cell_size;
     let mut buf: Vec<u8> = vec![0; w * h * 3];
-    let mut date = Utc.ymd(2018, 1, 1).naive_utc();
+    for i in 0..buf.len() {
+        buf[i] = match i % 3 {
+            0 => 74,
+            1 => 87,
+            2 => 99,
+            _ => unreachable!(),
+        }
+    }
+    let year = 2018;
+    let mut date = Utc.ymd(year, 1, 1).naive_utc();
     let mut week_row = 0;
-    while date.year() == 2018 {
+    let cell_size = cell_size as u32;
+    while date.year() == year {
         let month_row = date.month0() / 3;
         let month_col = date.month0() % 3;
         let week_col = date.weekday().num_days_from_monday();
 
-        let x = month_col * 8 + week_col;
-        let y = month_row * 7 + week_row;
-        let index = (x as usize + y as usize * w) * 3;
+        let x = month_col * 8 * cell_size + week_col * cell_size;
+        let y = month_row * 7 * cell_size + week_row * cell_size;
 
         let mood = moodmap.get(&date).unwrap_or(&Mood::Unknown);
         let (r, g, b) = mood.to_color();
-        buf[index + 0] = r;
-        buf[index + 1] = g;
-        buf[index + 2] = b;
+
+        for y in y..(y + cell_size) {
+            for x in x..(x + cell_size) {
+                let index = (x as usize + y as usize * w) * 3;
+                buf[index + 0] = r;
+                buf[index + 1] = g;
+                buf[index + 2] = b;
+            }
+        }
 
         date += chrono::Duration::days(1);
         if date.weekday() == Weekday::Mon {
@@ -63,12 +80,12 @@ enum Mood {
 impl Mood {
     fn to_color(&self) -> (u8, u8, u8) {
         match self {
-            Mood::Rad => (251, 149, 23),
-            Mood::Good => (87, 175, 115),
-            Mood::Meh => (125, 56, 151),
-            Mood::Bad => (31, 77, 137),
-            Mood::Awful => (46, 78, 92),
-            _ => (0, 0, 0),
+            Mood::Rad => (99, 158, 90),
+            Mood::Good => (147, 199, 101),
+            Mood::Meh => (74, 221, 187),
+            Mood::Bad => (237, 153, 143),
+            Mood::Awful => (253, 108, 110),
+            _ => (75, 87, 99),
         }
     }
 }
