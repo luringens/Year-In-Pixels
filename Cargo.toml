@@ -5,3 +5,5 @@ authors = ["Stian Soltvedt <stian@soltvedt.info>"]
 edition = "2018"
 
 [dependencies]
+csv = "1.1"
+image = "0.22.1"
