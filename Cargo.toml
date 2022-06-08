@@ -2,9 +2,9 @@
 name = "yearinpixels"
 version = "0.1.0"
 authors = ["Stian Soltvedt <stian@soltvedt.info>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
-csv = "1.1.1"
-image = "0.22.1"
-chrono = "0.4.7"
+csv = "^1.1.1"
+image = "^0.24.2"
+chrono = "^0.4.7"

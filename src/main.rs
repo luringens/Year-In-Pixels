@@ -1,8 +1,9 @@
 use chrono::prelude::*;
+use image::ImageEncoder;
 use std::collections::HashMap;
 use std::str::FromStr;
 
-fn main() -> Result<(), Box<std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Build the CSV reader and iterate over each record.
     let mut rdr = csv::Reader::from_reader(std::io::stdin());
     let mut moodmap = HashMap::with_capacity(365);
@@ -20,8 +21,8 @@ fn main() -> Result<(), Box<std::error::Error>> {
     let h = 27 * cell_size;
     let w = 23 * cell_size;
     let mut buf: Vec<u8> = vec![0; w * h * 3];
-    for i in 0..buf.len() {
-        buf[i] = match i % 3 {
+    for (i, item) in buf.iter_mut().enumerate() {
+        *item = match i % 3 {
             0 => 74,
             1 => 87,
             2 => 99,
@@ -46,7 +47,7 @@ fn main() -> Result<(), Box<std::error::Error>> {
         for y in y..(y + cell_size) {
             for x in x..(x + cell_size) {
                 let index = (x as usize + y as usize * w) * 3;
-                buf[index + 0] = r;
+                buf[index] = r;
                 buf[index + 1] = g;
                 buf[index + 2] = b;
             }
@@ -62,8 +63,8 @@ fn main() -> Result<(), Box<std::error::Error>> {
     }
 
     let writer = std::fs::File::create("image.png")?;
-    let encoder = image::png::PNGEncoder::new(writer);
-    encoder.encode(&buf, w as u32, h as u32, image::ColorType::RGB(8))?;
+    let encoder = image::codecs::png::PngEncoder::new(writer);
+    encoder.write_image(&buf, w as u32, h as u32, image::ColorType::Rgb8)?;
     Ok(())
 }
 
@@ -78,7 +79,7 @@ enum Mood {
 }
 
 impl Mood {
-    fn to_color(&self) -> (u8, u8, u8) {
+    fn to_color(self) -> (u8, u8, u8) {
         match self {
             Mood::Rad => (99, 158, 90),
             Mood::Good => (147, 199, 101),
